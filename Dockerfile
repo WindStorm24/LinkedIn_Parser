@@ -1,6 +1,5 @@
 FROM python:3.10-slim
 
-
 RUN apt-get update && apt-get install -y \
     wget \
     unzip \
@@ -17,23 +16,24 @@ RUN apt-get update && apt-get install -y \
     libasound2 \
     libatk1.0-0 \
     libgtk-3-0 \
+    libgbm1 \
     && rm -rf /var/lib/apt/lists/*
 
 
-RUN wget -qO- https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb > chrome.deb && \
-    apt install -y ./chrome.deb && \
-    rm chrome.deb
+RUN wget -qO google-chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
+    apt install -y ./google-chrome.deb && \
+    rm google-chrome.deb
 
 
-RUN wget -qO- https://chromedriver.storage.googleapis.com/$(curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE)/chromedriver_linux64.zip > chromedriver.zip && \
+RUN CHROME_VERSION=$(google-chrome --version | awk '{print $3}') && \
+    CHROMEDRIVER_VERSION=$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION) && \
+    wget -qO chromedriver.zip https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip && \
     unzip chromedriver.zip && \
     chmod +x chromedriver && \
     mv chromedriver /usr/local/bin/ && \
     rm chromedriver.zip
 
-
 WORKDIR /app
-
 
 COPY . .
 
